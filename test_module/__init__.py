@@ -1,4 +1,4 @@
 from test_module import tester
 
-class test_init():
-	pass
+# class test_init():
+# 	pass

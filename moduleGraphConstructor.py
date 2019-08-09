@@ -98,16 +98,23 @@ class ModuleGraphConstructor():
                 # Checks if dir is in .gitignore
                 flag = False
                 for elem in self.ignore_dirs:
-                    pattern = re.compile(elem)
-                    if re.match(pattern, name):
-                        flag = True
-                        break
+                    # for elem starting with *, re.match can't parse
+                    if elem.startswith('*'):
+                        pattern = elem.split('*')[-1]
+                        if name.endswith(pattern):
+                            flag = True
+                            break
+                    else:
+                        pattern = re.compile(elem)
+                        if re.match(pattern, name):
+                            flag = True
+                            break
                 if flag == True:
                     continue
 
                 if construct:
                     self.constructDirNode(root, full_name)
-        """Clean up directory nodes that don't have a parent"""
+        # Clean up directory nodes that don't have a parent
         self.cleanDir()
 
         for root, dirs, files in os.walk(self.module_root, topdown=True):
@@ -116,10 +123,17 @@ class ModuleGraphConstructor():
                 # Checks if file is in .gitignore
                 flag = False
                 for elem in self.ignore_files:
-                    pattern = re.compile(elem)
-                    if re.match(pattern, name):
-                        flag = True
-                        break
+                    # for elem starting with *, re.match can't parse
+                    if elem.startswith('*'):
+                        pattern = elem.split('*')[-1]
+                        if name.endswith(pattern):
+                            flag = True
+                            break
+                    else:
+                        pattern = re.compile(elem)
+                        if re.match(pattern, name):
+                            flag = True
+                            break
                 if root not in self.directories:
                     flag = True
                 if flag == True:
@@ -127,7 +141,9 @@ class ModuleGraphConstructor():
                 if construct:
                     self.constructFileNode(root, full_name, onlyPython)
 
-    """Recursively traverse upwards to find the root"""
+    """
+        Recursively traverse upwards to find the root
+    """
     def traverseDirUp(self, directory, success):
         try:
             parent = self.directories[directory].parentDir
@@ -139,7 +155,9 @@ class ModuleGraphConstructor():
         else:
             return self.traverseDirUp(parent, success)
 
-    """Clean up directory nodes that don't have a parent"""
+    """
+        Clean up directory nodes that don't have a parent
+    """
     def cleanDir(self):
         deletes = []
         for directory in self.directories.keys():

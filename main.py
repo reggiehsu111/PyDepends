@@ -3,7 +3,7 @@ from fileGraphConstructor import FileGraphConstructor
 from moduleGraphConstructor import ModuleGraphConstructor
 from moduleNode import ModuleNode
 from test_module.tester import test_func
-from test_module import test_init
+# from test_module import test_init
 
 def main():
     parser = argparse.ArgumentParser(description="Find File Dependencies")
