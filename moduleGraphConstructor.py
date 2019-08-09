@@ -1,15 +1,18 @@
 import os
-from moduleClasses import *
+from moduleClasses import File, Directory
 from fileGraphConstructor import FileGraphConstructor
 from visualizer import graphVisualizer
 import re
 from util import print_tabs
+from moduleNode import ModuleNode
+import sys
+import imp
 
 """
     Class ModuleGraphConstructor to construct module directory tree
 """
 class ModuleGraphConstructor():
-    def __init__(self, module_root):
+    def __init__(self, module_root, ignoreConfig):
         """
             Params: 
                 module_root:    path to the root of the module
@@ -18,10 +21,14 @@ class ModuleGraphConstructor():
         self.FGC = FileGraphConstructor()
         self.directories = {}
         self.files = {}
-        self.graphVis = graphVisualizer()
+        # For plotting file structure graph
+        self.graphVis = graphVisualizer(self.module_root)
         self.ignore_files = []
         self.ignore_dirs = []
-        with open(self.module_root+'/'+'.gitignore','r') as f:
+        self.ignoreConfig = ignoreConfig
+        # Set to store all external dependencies of a module
+        self.allExterns = set()
+        with open(self.module_root+'/'+self.ignoreConfig,'r') as f:
             ignore_files = f.read().splitlines() 
         for file in ignore_files:
             if file.endswith('/'):
@@ -43,14 +50,9 @@ class ModuleGraphConstructor():
         def process(self):
             # Add key in self.directories if parent_dir not exist
             if parent_dir not in self.directories:
-            #     # Set parent of the parent_dir to none if parent_dir is module_root
+                # Set parent of the parent_dir to none if parent_dir is module_root
                 if parent_dir == self.module_root:
                     self.directories[parent_dir] = Directory(parent_dir, None, None, newFile)
-                else:
-                    pass
-            #         parent_of_parent = root.split('/')[:-1]
-            #         parent_of_parent = '/'.join(parent_of_parent)
-            #         self.directories[parent_dir] = Directory(parent_dir,parent_of_parent, None, newFile)
             # Else add file to childFile of parent_dir
             else:
                 self.directories[parent_dir].addChildFile(newFile)
@@ -73,15 +75,9 @@ class ModuleGraphConstructor():
         self.directories[dirName] = newDir
         # Add key in self.directories if parent_dir not exist
         if parent_dir not in self.directories:
-            pass
             # # Set parent of the parent_dir to none if parent_dir is module_root
             if parent_dir == self.module_root:
                 self.directories[parent_dir] = Directory(parent_dir, None, newDir, None)
-            else:
-                pass
-            #     parent_of_parent = root.split('/')[:-1]
-            #     parent_of_parent = '/'.join(parent_of_parent)
-            #     self.directories[parent_dir] = Directory(parent_dir,parent_of_parent, newDir, None)
         # Else add file to childFile of parent_dir
         else:
             self.directories[parent_dir].addChildDir(newDir)
@@ -159,9 +155,9 @@ class ModuleGraphConstructor():
     """
     def printModule(self):
         currentnode = self.directories[self.module_root]
+        print(".....File Structure.....")
         self.traversePrint(currentnode, -1)
-        self.graphVis.layout(prog='dot')
-        self.graphVis.draw('file_structure.png')
+        self.graphVis.showGraph()
 
     def traversePrint(self, currentnode, depth):
         depth += 1
@@ -184,13 +180,109 @@ class ModuleGraphConstructor():
             if len(currentnode.childFile) > 0:
                 for fileNode in currentnode.childFile:
                     self.traversePrint(fileNode, depth)
+
+    """
+        Walk through all dependent modules in currentfile and store external and dependencies in the currentfile node
+        Update moduleNodes in FGC while parsing
+    """
+    def parseFGC(self, currentfile):
+        currentfile = self.files[currentfile]
+        print("\tAll modules:")
+        temp_dict = {}
+        # Iterate through all module nodes to parse
+        for node in self.FGC.moduleNodes.values():
+            print('\t\t'+node.module)
+            delegates = node.module.split('.')
+            # Relative import
+            if node.module.startswith('.'):
+                print(node.module,"is a relative import, the parsing utility is not supported yet")
+            # Absolute import
+            else:
+                tracenode = self.directories[self.module_root]
+                # Variable count to store how many delegates processed
+                count = 0
+                # delegate must be a file or directory
+                for delegate in delegates:
+                    count += 1
+                    delegate = '/'.join([tracenode.FullName,delegate])
+                    # if delegate is a directory
+                    if delegate in self.directories:
+                        tracenode = self.directories[delegate]
+                        # If walk to the end, dependent file is in node.functions or in __init__.py
+                        if count == len(delegates):
+                            for func in node.functions:
+
+                                if "__init__.py" in tracenode.childFile:
+                                    pass
+                                temp_file = '/'.join([tracenode.FullName, func.alias])
+                                temp_file += '.py'
+                                tracenode = self.files[temp_file]
+                                currentfile.dependFiles.add(tracenode)
+                                self.graphVis.addDependencies(currentfile,tracenode)
+                                # Update moduleNode
+                                temp_dict[func] = ModuleNode(func.alias,func.alias)
+                    else:
+                        delegate += '.py'
+                        # if delegate is a file
+                        if delegate in self.files:
+                            tracenode = self.files[delegate]
+                            self.graphVis.addDependencies(currentfile,tracenode)
+                            currentfile.dependFiles.add(tracenode)
+                            # Update moduleNode
+                            temp_dict[node] = ModuleNode(delegate.split('.')[-2].strip('/').replace('/','.'), node.alias, node.functionNames)
+                        # else delegate is an external dependency
+                        else:
+                            currentfile.externals.add(node.module)
+                            # Update moduleNode
+                            temp_dict[node] = ModuleNode(node.module,node.alias, node.functionNames)
+                            self.allExterns.add(delegates[0])
+                            continue
+                        
+        del self.FGC.moduleNodes
+        self.FGC.moduleNodes = temp_dict
+        print('')
+        currentfile.print_externals()
+        currentfile.print_dependencies()
+
     """
         Traverse files in self.files and find their dependencies
     """
-    def traverse_pythonFiles(self):
+    def findDepends(self, verbose=True):
         for file in self.files:
             if file.endswith('.py'):
-                print("File:", file)
+
+                print("\nFile:", file)
                 self.FGC.readFile(file)
                 self.FGC.visitTree()
-                self.FGC.print_nodes(depth=1)
+                if verbose:
+                    print("\n\t....Before parsing....")
+                    self.FGC.print_nodes(depth=1)
+                    print("\t......................\n")
+                self.parseFGC(file)
+                if verbose:
+                    print("\n\t....After parsing....")
+                    self.FGC.print_nodes(depth=1)
+                    print("\t......................\n")
+        print("......All external dependencies......")
+        for extern in self.allExterns:
+            print(extern)
+
+    """
+        Function to write requirements.txt without specifying package versions
+        Use this function after running findDepends!!!
+    """
+    def writeRequirements(self):
+        with open('requirements.txt','w') as f:
+            python_path = os.path.dirname(sys.executable)
+            for extern in self.allExterns:
+                module_path = imp.find_module(extern)[1]
+                if module_path:
+                    if 'site-packages' in module_path:
+                        f.write(extern+'\n')
+                    else:
+                        print(extern)
+                else:
+                    print(extern)
+            print("Are builtin packages")
+        return
+

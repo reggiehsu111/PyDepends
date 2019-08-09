@@ -27,4 +27,4 @@ class FuncNode():
             print_tabs(depth)
             print("Function:", self.alias)
             print_tabs(depth) 
-            print(self.alias+" no dependencies")
+            print("Function "+self.alias+" no dependencies")

@@ -6,9 +6,27 @@ class File():
         self.FullName = FullName
         self.FileName = self.FullName.split('/')[-1]
         self.parentDir = parentDir
+        self.dependFiles = set()
+        self.externals = set()
 
     def __repr__(self):
         return self.FileName
+
+    def print_dependencies(self):
+        if len(self.dependFiles) > 0:
+            print("\tDepend Files:")
+            for dep in self.dependFiles:
+                print("\t\t" + dep.FileName)
+        else:
+            print("\tNo depend files")
+
+    def print_externals(self):
+        if len(self.externals) > 0:
+            print("\tExternals:")
+            for extern in self.externals:
+                print("\t\t" + extern)
+        else:
+            print("\tNo external dependencies")
 
     @classmethod
     def customType(self):
