@@ -1,5 +1,5 @@
 import ast
-from moduleNode import ModuleNode
+from FGC.moduleNode import ModuleNode
 
 
 """

@@ -1,10 +1,10 @@
 import os
-from moduleClasses import File, Directory
-from fileGraphConstructor import FileGraphConstructor
-from visualizer import graphVisualizer
+from MGC.moduleClasses import File, Directory
+from FGC.fileGraphConstructor import FileGraphConstructor
+from visualizer.visualizer import graphVisualizer
 import re
-from util import print_tabs
-from moduleNode import ModuleNode
+from utils.util import print_tabs
+from FGC.moduleNode import ModuleNode
 import sys
 import imp
 

@@ -1,7 +1,7 @@
 import argparse
-from fileGraphConstructor import FileGraphConstructor
+from FGC.fileGraphConstructor import FileGraphConstructor
 from moduleGraphConstructor import ModuleGraphConstructor
-from moduleNode import ModuleNode
+from FGC.moduleNode import ModuleNode
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     parser.add_argument('-af','--allFiles', action='store_false', help='Specify if only python files are considered')
     parser.add_argument('-ic','--ignoreConfig', type=str, default='.gitignore', help='Config file to specify which files to ignore')
     parser.add_argument('-vb','--verbose', action='store_true', help='determine if verbosely find dependencies')
-    parser.add_argument('-gp', '--graphpath', type=str, default='file_structure.png', help='path to save the file structure graph')
+    parser.add_argument('-gp', '--graphpath', type=str, default='file_structure', help='path to save the file structure graph')
     args = parser.parse_args()
 
     """
@@ -20,6 +20,7 @@ def main():
     """
     # FGC = FileGraphConstructor('moduleClasses.py')
     # FGC.visitTree()
+    # FGC.print_nodes()
 
     """
         Initialize the MGC by specifying moduel root and ignore file

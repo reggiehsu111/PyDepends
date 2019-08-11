@@ -1,5 +1,3 @@
-from classNode import ClassNode
-
 """
     Class File to store a file under the root directory
 """

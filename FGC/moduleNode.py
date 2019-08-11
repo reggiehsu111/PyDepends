@@ -1,4 +1,4 @@
-from util import print_tabs
+from utils.util import print_tabs
 
 """
     Class ObjectNode as a sub-node to moduleNode
