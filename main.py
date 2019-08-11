@@ -2,8 +2,7 @@ import argparse
 from fileGraphConstructor import FileGraphConstructor
 from moduleGraphConstructor import ModuleGraphConstructor
 from moduleNode import ModuleNode
-from test_module.tester import test_func
-from test_module import test_init
+from test_module import *
 
 def main():
     parser = argparse.ArgumentParser(description="Find File Dependencies")
@@ -48,6 +47,7 @@ def main():
         Find file dependencies in the module
         Args:
             verbose:    Determines whether to print out parsing results verbosely
+
     """
     MGC.findDepends(verbose=args.verbose)
     MGC.printModule(show_graph=False)

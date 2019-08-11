@@ -293,6 +293,11 @@ class ModuleGraphConstructor():
             cf = self.files[currentfile]
             temp_root_dir = '/'.join(pcd.split('/')[:-1])
             obj = pcd.split('/')[-1]
+            # if obj == "*", import all files under the directory  
+            if obj == "*":
+                for file in self.directories[temp_root_dir].childFile:
+                    cf.dependFiles.add(file)
+                    self.graphVis.addDependencies(cf, file)
             for file in self.directories[temp_root_dir].childFile:
                 if "__init__.py" == file.FileName:
                     if obj in file.classes:
