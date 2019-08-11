@@ -2,7 +2,6 @@ import argparse
 from fileGraphConstructor import FileGraphConstructor
 from moduleGraphConstructor import ModuleGraphConstructor
 from moduleNode import ModuleNode
-from test_module import *
 
 def main():
     parser = argparse.ArgumentParser(description="Find File Dependencies")
@@ -50,7 +49,7 @@ def main():
 
     """
     MGC.findDepends(verbose=args.verbose)
-    MGC.printModule(show_graph=False)
+    MGC.printModule(show_graph=True)
 
     """
         Write external dependencies found by findDepends() into requirements.txt for pip to install

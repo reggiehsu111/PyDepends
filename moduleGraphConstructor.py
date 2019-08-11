@@ -211,53 +211,80 @@ class ModuleGraphConstructor():
             print("\tAll modules:")
         # Iterate all module nodes to parse through
         for node in self.FGC.moduleNodes.values():
-            if verbose:
-                print('\t\t'+node.module)
-            
-            # Relative import
-            if node.module.startswith('.'):
-                print(node.module,"is a relative import, the parsing utility is not supported yet")
+            # Relative import or import is either . or .. or ...
+            if node.module == None or node.level>0:
+                level = node.level
+                tracenode = currentfile
+                for lv in range(level):
+                    tracenode = self.directories[tracenode.parentDir]
+                if node.module is not None:
+                    delegates = node.module.split('.')
+                    if verbose:
+                        print('\t\t'+node.module)
+                else:
+                    delegates = []
+                    if verbose:
+                        print('\t\t', end='')
+                        for lv in range(level):
+                            print('.', end='')
+                    for obj in node.objs:
+                            temp_file = '/'.join([tracenode.FullName, obj.alias+'.py'])
+                            # If successfully find temp_file in self.files, obj is a file
+                            try:
+                                tracenode = self.files[temp_file]
+                                currentfile.dependFiles.add(tracenode)
+                                self.graphVis.addDependencies(currentfile,tracenode)
+                            # Else obj is a class defined in __init__.py or there is an error
+                            except KeyError as e:
+                                key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
+                                if key not in self.possibleClassDefs:
+                                    self.possibleClassDefs[key] = obj
             # Absolute import
             else:
-                delegates = node.module.split('.')
+                if verbose:
+                    print('\t\t'+node.module)
                 # tracenode to determine the path of the module relative to module_root
                 tracenode = self.directories[self.module_root]
-                # Variable count to store how many delegates processed
-                count = 0
-                # delegate must be a file/directory/external_dependency
-                for delegate in delegates:
-                    count += 1
-                    delegate = '/'.join([tracenode.FullName,delegate])
-                    # If delegate is a directory, update tracenode and see if delegates are all processed
-                    if delegate in self.directories:
-                        tracenode = self.directories[delegate]
-                        # If walk to the end, dependent file is in node.objs or in __init__.py
-                        if count == len(delegates):
-                            for obj in node.objs:
-                                temp_file = '/'.join([tracenode.FullName, obj.alias+'.py'])
-                                # If successfully find temp_file in self.files, obj is a file
-                                try:
-                                    tracenode = self.files[temp_file]
-                                    currentfile.dependFiles.add(tracenode)
-                                    self.graphVis.addDependencies(currentfile,tracenode)
-                                # Else obj is a class defined in __init__.py or there is an error
-                                except KeyError as e:
-                                    key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
-                                    if key not in self.possibleClassDefs:
-                                        self.possibleClassDefs[key] = obj
-                                        # print("A possible class definition", obj ,"under:", tracenode.FullName, "is found")
+                delegates = node.module.split('.')
+            # Variable count to store how many delegates processed
+            count = 0
+            # delegate must be a file/directory/external_dependency
+            for dg in delegates:
+                count += 1
+                if count == 1:
+                    delegate = '/'.join([tracenode.FullName,dg])
+                else:
+                    delegate = '/'.join([delegate, dg])
+                # If delegate is a directory, update tracenode and see if delegates are all processed
+                if delegate in self.directories:
+                    # If walk to the end, dependent file is either in node.objs or in __init__.py
+                    if count == len(delegates):
+                        for obj in node.objs:
+                            tracenode = self.directories[delegate]
+                            temp_file = '/'.join([tracenode.FullName, obj.alias+'.py'])
+                            # If successfully find temp_file in self.files, obj is a file
+                            try:
+                                tracenode = self.files[temp_file]
+                                currentfile.dependFiles.add(tracenode)
+                                self.graphVis.addDependencies(currentfile,tracenode)
+                            # Else obj is a class defined in __init__.py or there is an error
+                            except KeyError as e:
+                                key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
+                                if key not in self.possibleClassDefs:
+                                    self.possibleClassDefs[key] = obj
+                                    # print("A possible class definition", obj ,"under:", tracenode.FullName, "is found")
+                else:
+                    delegate += '.py'
+                    # if delegate is a file
+                    if delegate in self.files:
+                        tracenode = self.files[delegate]
+                        self.graphVis.addDependencies(currentfile,tracenode)
+                        currentfile.dependFiles.add(tracenode)
+                    # else delegate is an external dependency
                     else:
-                        delegate += '.py'
-                        # if delegate is a file
-                        if delegate in self.files:
-                            tracenode = self.files[delegate]
-                            self.graphVis.addDependencies(currentfile,tracenode)
-                            currentfile.dependFiles.add(tracenode)
-                        # else delegate is an external dependency
-                        else:
-                            # Update moduleNode
-                            self.allExterns.add(delegates[0])
-                            continue
+                        # Update moduleNode
+                        self.allExterns.add(delegates[0])
+                        continue
         if verbose:
             print('')
             # for mn in self.FGC.moduleNodes:
@@ -328,17 +355,37 @@ class ModuleGraphConstructor():
         Use this function after running findDepends!!!
     """
     def writeRequirements(self):
+        externs = set()
+        not_yet_installs = set()
+        built_ins = set()
         with open('requirements.txt','w') as f:
             python_path = os.path.dirname(sys.executable)
             for extern in self.allExterns:
-                module_path = imp.find_module(extern)[1]
-                if module_path:
-                    if 'site-packages' in module_path:
-                        f.write(extern+'\n')
+                try:
+                    module_path = imp.find_module(extern)[1]
+                    if module_path:
+                        if 'site-packages' in module_path:
+                            f.write(extern+'\n')
+                            externs.add(extern)
+                        else:
+                            built_ins.add(extern)
                     else:
-                        print(extern)
-                else:
-                    print(extern)
+                        built_ins.add(extern)
+                except ImportError as e:
+                    not_yet_installs.add(extern)
+                    f.write(extern+'\n')
             print("Are builtin packages")
+        print(".....External dependencies that are installed.....")
+        for ext in externs:
+            print('\t',ext)
+        print('')
+        print(".....External dependencies that are not installed.....")
+        for ext in not_yet_installs:
+            print('\t',ext)
+        print('')
+        print(".....Built in dependencies.....")
+        for ext in built_ins:
+            print('\t',ext)
+        print('')
         return
 

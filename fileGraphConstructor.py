@@ -42,12 +42,13 @@ class FileGraphConstructor(ast.NodeVisitor):
         for alias in node.names:
             temp_func = alias.name
             temp_alias = alias.asname
-            temp_module = node.module
-            if temp_module in self.moduleNodes:
-                self.moduleNodes[temp_module].addObjects(temp_func)
-            else:
-                temp_mn = ModuleNode(temp_module, temp_alias, temp_func)
-                self.moduleNodes[temp_module] = temp_mn
+        temp_module = node.module
+        temp_level = node.level
+        if temp_module in self.moduleNodes:
+            self.moduleNodes[temp_module].addObjects(temp_func)
+        else:
+            temp_mn = ModuleNode(temp_module, temp_alias, temp_func, temp_level)
+            self.moduleNodes[temp_module] = temp_mn
 
         self.generic_visit(node)
 

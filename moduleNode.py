@@ -36,7 +36,7 @@ class ObjectNode():
     Store in FGC
 """
 class ModuleNode():
-    def __init__(self, module, alias, obj=None, *depends):
+    def __init__(self, module, alias, obj=None, level=0, *depends):
         """
             Params:
                 module:     String type arg
@@ -46,6 +46,7 @@ class ModuleNode():
                 self.objectNames: List of strings containing obj names
         """
         self.module = module
+        self.level = level
         self.depends = set(depends)
         self.objs = []
         self.objectNames = []

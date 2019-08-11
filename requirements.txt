@@ -1,3 +1,11 @@
-networkx
+torchvision
+PIL
+visdom
+numpy
+azureml
+terminaltables
+dominate
+scipy
 matplotlib
-pygraphviz
+tqdm
+torch
