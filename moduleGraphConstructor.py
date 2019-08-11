@@ -12,10 +12,12 @@ import imp
     Class ModuleGraphConstructor to construct module directory tree
 """
 class ModuleGraphConstructor():
-    def __init__(self, module_root, ignoreConfig):
+    def __init__(self, module_root, ignoreConfig, graph_file_path):
         """
             Params: 
                 module_root:    path to the root of the module
+                ignoreConfig:   path to the ignoreConfig file
+                graph_file_path:path to save the graph
         """
         self.module_root = module_root
         self.FGC = FileGraphConstructor()
@@ -26,7 +28,7 @@ class ModuleGraphConstructor():
         # Dict type to store resolved ClassDefs defined in __init__.py
         self.resolvedClassDefs = {}
         # For plotting file structure graph
-        self.graphVis = graphVisualizer(self.module_root)
+        self.graphVis = graphVisualizer(graph_file_path)
         self.ignore_files = []
         self.ignore_dirs = []
         self.ignoreConfig = ignoreConfig
@@ -272,7 +274,7 @@ class ModuleGraphConstructor():
                                 key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
                                 if key not in self.possibleClassDefs:
                                     self.possibleClassDefs[key] = obj
-                                    # print("A possible class definition", obj ,"under:", tracenode.FullName, "is found")
+
                 else:
                     delegate += '.py'
                     # if delegate is a file
@@ -282,7 +284,10 @@ class ModuleGraphConstructor():
                         currentfile.dependFiles.add(tracenode)
                     # else delegate is an external dependency
                     else:
-                        # Update moduleNode
+                        # Add external dependency
+                        currentfile.externals.add(delegates[0])
+                        self.graphVis.add_node(delegates[0], color='green')
+                        self.graphVis.addExternals(currentfile, delegates[0])
                         self.allExterns.add(delegates[0])
                         continue
         if verbose:
@@ -293,6 +298,7 @@ class ModuleGraphConstructor():
             currentfile.print_dependencies()
             currentfile.print_classes()
             currentfile.print_functions()
+
 
     """
         Construct classDefs and functionDefs into the file nodes after running self.FGC.visitTree()
@@ -337,15 +343,12 @@ class ModuleGraphConstructor():
     def findDepends(self, verbose=True):
         for file in self.files:
             if file.endswith('.py'):
-
                 print("\nFile:", file)
                 self.FGC.readFile(file)
                 self.FGC.visitTree()
                 self.constructDefs(file)
                 self.parseFGC(file, verbose)
                 self.resolvePCD()
-                if verbose:
-                    self.FGC.print_nodes(depth=1)
         print("......All external dependencies......")
         for extern in self.allExterns:
             print(extern)
@@ -388,4 +391,3 @@ class ModuleGraphConstructor():
             print('\t',ext)
         print('')
         return
-

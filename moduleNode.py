@@ -86,7 +86,10 @@ class ModuleNode():
             print_tabs(depth)
             print("Module:", self.module)
             print_tabs(depth)
-            print("File "+self.module+" no dependencies")
+            if self.module is not None:
+                print("File "+self.module+" no dependencies")
+            else:
+                print("File . no dependencies")
 
     def printObjects(self,depth):
         depth += 1

@@ -2,9 +2,9 @@ import pygraphviz as pgv
 import networkx as nx
 import matplotlib.pyplot as plt
 class graphVisualizer(pgv.AGraph):
-    def __init__(self, module_root):
+    def __init__(self, graph_file_path):
         super().__init__(strict=False,directed=True)
-        self.module_root = module_root
+        self.graph_file_path = graph_file_path
         self.allnodes = set()
         self.alledges = set()
 
@@ -28,7 +28,7 @@ class graphVisualizer(pgv.AGraph):
 
     def addDir(self,DirNode):
         assert DirNode.customType() == 'Directory'
-        self.add_node(DirNode.DirName)
+        self.add_node(DirNode.DirName, color='black')
         for childDir in DirNode.childDir:
             self.add_edge(DirNode.DirName,childDir.DirName)
         for childFile in DirNode.childFile:
@@ -37,7 +37,11 @@ class graphVisualizer(pgv.AGraph):
     def addDependencies(self, currentfile, tracenode):
         assert currentfile.customType() == 'File'
         assert tracenode.customType() == 'File'
-        self.add_edge(currentfile.FileName, tracenode.FileName, color = 'red')
+        self.add_edge(currentfile.FileName, tracenode.FileName, color='red')
+
+    def addExternals(self, currentfile, extern):
+        assert currentfile.customType() == 'File'
+        self.add_edge(currentfile.FileName, extern, color='green')
 
     def showGraph(self):
         for base in self.__class__.__bases__:
@@ -48,7 +52,8 @@ class graphVisualizer(pgv.AGraph):
     """ Use when using pgv as dependency """
     def showGraphPGV(self):
         self.layout(prog='dot')
-        self.draw(self.module_root+'_file_structure.png')
+        self.draw(self.graph_file_path)
+        self.write(self.graph_file_path.split('.')[0]+'.dot')
 
     """ Use when using nx as dependency """
     def showGraphNX(self):

@@ -1,11 +1,11 @@
-torchvision
-PIL
 visdom
-numpy
-azureml
 terminaltables
-dominate
 scipy
 matplotlib
+dominate
+torchvision
+azureml
 tqdm
+numpy
 torch
+PIL
