@@ -5,6 +5,22 @@ class graphVisualizer(pgv.AGraph):
     def __init__(self, module_root):
         super().__init__(strict=False,directed=True)
         self.module_root = module_root
+        self.allnodes = set()
+        self.alledges = set()
+
+    def add_node(self, Node, *args, **kwargs):
+        super().add_node(Node, *args, **kwargs)
+        self.allnodes.add(Node)
+
+
+    def add_edge(self, Node1, Node2, *args, **kwargs):
+        if Node1+'/'+Node2 not in self.alledges:
+            super().add_edge(Node1, Node2, *args, **kwargs)
+            self.allnodes.add(Node1)
+            self.allnodes.add(Node2)
+            self.alledges.add(Node1+'/'+Node2)
+        else:
+            return
 
     def addFile(self,FileNode):
         assert FileNode.customType() == 'File'
@@ -12,6 +28,7 @@ class graphVisualizer(pgv.AGraph):
 
     def addDir(self,DirNode):
         assert DirNode.customType() == 'Directory'
+        self.add_node(DirNode.DirName)
         for childDir in DirNode.childDir:
             self.add_edge(DirNode.DirName,childDir.DirName)
         for childFile in DirNode.childFile:
@@ -36,5 +53,5 @@ class graphVisualizer(pgv.AGraph):
     """ Use when using nx as dependency """
     def showGraphNX(self):
         pos=nx.spring_layout(self)
-        nx.draw(self,pos)
+        nx.draw(self,pos,with_labels=True)
         plt.show()

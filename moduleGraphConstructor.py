@@ -21,6 +21,10 @@ class ModuleGraphConstructor():
         self.FGC = FileGraphConstructor()
         self.directories = {}
         self.files = {}
+        # Dict type to store possible ClassDefs defined in __init__.py
+        self.possibleClassDefs = {}
+        # Dict type to store resolved ClassDefs defined in __init__.py
+        self.resolvedClassDefs = {}
         # For plotting file structure graph
         self.graphVis = graphVisualizer(self.module_root)
         self.ignore_files = []
@@ -84,10 +88,9 @@ class ModuleGraphConstructor():
         
 
 
-    def traverse_module(self, construct=False, onlyPython=False):
+    def traverse_module(self, onlyPython=False):
         """
             Params:
-                construct:  whether to construct file structure graph
                 onlyPython: whether to construct only python files
         """
         print("Traversing Module... ")
@@ -112,8 +115,7 @@ class ModuleGraphConstructor():
                 if flag == True:
                     continue
 
-                if construct:
-                    self.constructDirNode(root, full_name)
+                self.constructDirNode(root, full_name)
         # Clean up directory nodes that don't have a parent
         self.cleanDir()
 
@@ -138,8 +140,7 @@ class ModuleGraphConstructor():
                     flag = True
                 if flag == True:
                     continue
-                if construct:
-                    self.constructFileNode(root, full_name, onlyPython)
+                self.constructFileNode(root, full_name, onlyPython)
 
     """
         Recursively traverse upwards to find the root
@@ -171,11 +172,12 @@ class ModuleGraphConstructor():
     """
         Print module structure on the terminal and draw graph
     """
-    def printModule(self):
+    def printModule(self, show_graph=True):
         currentnode = self.directories[self.module_root]
         print(".....File Structure.....")
         self.traversePrint(currentnode, -1)
-        self.graphVis.showGraph()
+        if show_graph:
+            self.graphVis.showGraph()
 
     def traversePrint(self, currentnode, depth):
         depth += 1
@@ -203,42 +205,47 @@ class ModuleGraphConstructor():
         Walk through all dependent modules in currentfile and store external and dependencies in the currentfile node
         Update moduleNodes in FGC while parsing
     """
-    def parseFGC(self, currentfile):
+    def parseFGC(self, currentfile, verbose):
         currentfile = self.files[currentfile]
-        print("\tAll modules:")
-        temp_dict = {}
-        # Iterate through all module nodes to parse
+        if verbose:
+            print("\tAll modules:")
+        # Iterate all module nodes to parse through
         for node in self.FGC.moduleNodes.values():
-            print('\t\t'+node.module)
-            delegates = node.module.split('.')
+            if verbose:
+                print('\t\t'+node.module)
+            
             # Relative import
             if node.module.startswith('.'):
                 print(node.module,"is a relative import, the parsing utility is not supported yet")
             # Absolute import
             else:
+                delegates = node.module.split('.')
+                # tracenode to determine the path of the module relative to module_root
                 tracenode = self.directories[self.module_root]
                 # Variable count to store how many delegates processed
                 count = 0
-                # delegate must be a file or directory
+                # delegate must be a file/directory/external_dependency
                 for delegate in delegates:
                     count += 1
                     delegate = '/'.join([tracenode.FullName,delegate])
-                    # if delegate is a directory
+                    # If delegate is a directory, update tracenode and see if delegates are all processed
                     if delegate in self.directories:
                         tracenode = self.directories[delegate]
-                        # If walk to the end, dependent file is in node.functions or in __init__.py
+                        # If walk to the end, dependent file is in node.objs or in __init__.py
                         if count == len(delegates):
-                            for func in node.functions:
-
-                                if "__init__.py" in tracenode.childFile:
-                                    pass
-                                temp_file = '/'.join([tracenode.FullName, func.alias])
-                                temp_file += '.py'
-                                tracenode = self.files[temp_file]
-                                currentfile.dependFiles.add(tracenode)
-                                self.graphVis.addDependencies(currentfile,tracenode)
-                                # Update moduleNode
-                                temp_dict[func] = ModuleNode(func.alias,func.alias)
+                            for obj in node.objs:
+                                temp_file = '/'.join([tracenode.FullName, obj.alias+'.py'])
+                                # If successfully find temp_file in self.files, obj is a file
+                                try:
+                                    tracenode = self.files[temp_file]
+                                    currentfile.dependFiles.add(tracenode)
+                                    self.graphVis.addDependencies(currentfile,tracenode)
+                                # Else obj is a class defined in __init__.py or there is an error
+                                except KeyError as e:
+                                    key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
+                                    if key not in self.possibleClassDefs:
+                                        self.possibleClassDefs[key] = obj
+                                        # print("A possible class definition", obj ,"under:", tracenode.FullName, "is found")
                     else:
                         delegate += '.py'
                         # if delegate is a file
@@ -246,22 +253,52 @@ class ModuleGraphConstructor():
                             tracenode = self.files[delegate]
                             self.graphVis.addDependencies(currentfile,tracenode)
                             currentfile.dependFiles.add(tracenode)
-                            # Update moduleNode
-                            temp_dict[node] = ModuleNode(delegate.split('.')[-2].strip('/').replace('/','.'), node.alias, node.functionNames)
                         # else delegate is an external dependency
                         else:
-                            currentfile.externals.add(node.module)
                             # Update moduleNode
-                            temp_dict[node] = ModuleNode(node.module,node.alias, node.functionNames)
                             self.allExterns.add(delegates[0])
                             continue
-                        
-        del self.FGC.moduleNodes
-        self.FGC.moduleNodes = temp_dict
-        print('')
-        currentfile.print_externals()
-        currentfile.print_dependencies()
+        if verbose:
+            print('')
+            # for mn in self.FGC.moduleNodes:
+            #     self.FGC.moduleNodes[mn].print(2)
+            currentfile.print_externals()
+            currentfile.print_dependencies()
+            currentfile.print_classes()
+            currentfile.print_functions()
 
+    """
+        Construct classDefs and functionDefs into the file nodes after running self.FGC.visitTree()
+    """
+    def constructDefs(self, file):
+        """
+            Params:
+                file:   fileName
+        """
+        assert file.endswith('.py')
+        print("Constructing definitions in file:", file)
+        for clss in self.FGC.classes:
+            self.files[file].classes[clss] = self.FGC.classes[clss]
+        for func in self.FGC.functions:
+            self.files[file].functions[func] = self.FGC.functions[func]
+
+    """
+        Determine whether objects in self.possibleClassDefs are actually class definitions
+        Must run this method after running parseFGC
+    """
+    def resolvePCD(self):
+        for pcd in self.possibleClassDefs:
+            currentfile, pcd = pcd.split('|')
+            # cf is of type File
+            cf = self.files[currentfile]
+            temp_root_dir = '/'.join(pcd.split('/')[:-1])
+            obj = pcd.split('/')[-1]
+            for file in self.directories[temp_root_dir].childFile:
+                if "__init__.py" == file.FileName:
+                    if obj in file.classes:
+                        self.resolvedClassDefs[currentfile+'|'+pcd] = obj
+                        cf.dependFiles.add(file)
+                        self.graphVis.addDependencies(cf,file)
     """
         Traverse files in self.files and find their dependencies
     """
@@ -272,15 +309,11 @@ class ModuleGraphConstructor():
                 print("\nFile:", file)
                 self.FGC.readFile(file)
                 self.FGC.visitTree()
+                self.constructDefs(file)
+                self.parseFGC(file, verbose)
+                self.resolvePCD()
                 if verbose:
-                    print("\n\t....Before parsing....")
                     self.FGC.print_nodes(depth=1)
-                    print("\t......................\n")
-                self.parseFGC(file)
-                if verbose:
-                    print("\n\t....After parsing....")
-                    self.FGC.print_nodes(depth=1)
-                    print("\t......................\n")
         print("......All external dependencies......")
         for extern in self.allExterns:
             print(extern)

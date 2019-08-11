@@ -1,3 +1,5 @@
+from classNode import ClassNode
+
 """
     Class File to store a file under the root directory
 """
@@ -8,6 +10,8 @@ class File():
         self.parentDir = parentDir
         self.dependFiles = set()
         self.externals = set()
+        self.functions = {}
+        self.classes = {}
 
     def __repr__(self):
         return self.FileName
@@ -27,6 +31,22 @@ class File():
                 print("\t\t" + extern)
         else:
             print("\tNo external dependencies")
+
+    def print_classes(self):
+        if len(self.classes) > 0:
+            print("\tClasses:")
+            for clss in self.classes:
+                print("\t\t" + clss)
+        else:
+            print("\tNo class definitions")
+
+    def print_functions(self):
+        if len(self.functions) > 0:
+            print("\tFunctions:")
+            for func in self.functions:
+                print("\t\t" + func)
+        else:
+            print("\tNo function definitions")
 
     @classmethod
     def customType(self):

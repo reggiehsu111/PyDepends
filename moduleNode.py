@@ -1,44 +1,76 @@
-from funcNode import FuncNode
 from util import print_tabs
+
+"""
+    Class ObjectNode as a sub-node to moduleNode
+    To store imported function/class/filename after parsing through Import/ImportFrom AST nodes
+"""
+
+class ObjectNode():
+    def __init__(self, file, alias=None, *depends):
+        # file points to the moduleNode that contains the obj node
+        self.file= file
+        self.alias = alias
+        self.depends = set(depends)
+
+    def __repr__(self):
+        return self.file + '.' + self.alias
+
+    def addDependency(self, node):
+        self.depends.add(node)
+
+    def print(self, depth):
+        if len(self.depends) > 0:
+            print_tabs(depth)
+            print("Object:", self.alias) 
+            print_tabs(depth)
+            print("\tObject dependencies: ")
+            print_tabs(depth)
+            for elem in self.depends:
+                print("\t\t",elem)
+        else:
+            print_tabs(depth) 
+            print("Object "+self.alias+" no dependencies")
+
 """
     Class ModuleNode as a node in the ast dependency graph
     Store in FGC
 """
 class ModuleNode():
-    def __init__(self, module, alias, functions=None, *depends):
+    def __init__(self, module, alias, obj=None, *depends):
         """
             Params:
                 module:     String type arg
-                alias:      String type arg
-                functions:  List of string or strings
+                obj:  List of string or strings
             Attributes:
-                self.functions:     List of funcNodes
-                self.functionNames: List of strings
+                self.objs:     List of funcNodes
+                self.objectNames: List of strings containing obj names
         """
         self.module = module
-        self.alias = alias
         self.depends = set(depends)
-        self.functions = []
-        self.functionNames = []
-        self.addFunctions(functions)
+        self.objs = []
+        self.objectNames = []
+        self.alias = alias
+        self.addObjects(obj)
+
 
 
     def addDependency(self, node):
         self.depends.add(node)
 
-    def addFunctions(self, functions):
-        if functions is not None:
-            if isinstance(functions, list):
-                for func in functions:
-                    self.functionNames.append(func)
-                    func = FuncNode(self.module, func)
-                    assert isinstance(func, FuncNode)
-                    self.functions.append(func)
+    def addObjects(self, obj):
+        if obj is not None:
+            if isinstance(obj, list):
+                for func in obj:
+                    self.objectNames.append(func)
+                    func = ObjectNode(self.module, func)
+                    assert isinstance(func, ObjectNode)
+                    self.objs.append(func)
             else:
-                self.functionNames.append(functions)
-                functions = FuncNode(self.module, functions)
-                assert isinstance(functions, FuncNode)
-                self.functions.append(functions)
+                self.objectNames.append(obj)
+                obj = ObjectNode(self.module, obj)
+                assert isinstance(obj, ObjectNode)
+                self.objs.append(obj)
+
 
     def printDependencies(self,depth):
         if len(self.depends) > 0:
@@ -55,14 +87,16 @@ class ModuleNode():
             print_tabs(depth)
             print("File "+self.module+" no dependencies")
 
-    def printFunctions(self,depth):
+    def printObjects(self,depth):
         depth += 1
-        for func in self.functions:
+        for func in self.objs:
             func.print(depth)
 
     def print(self, depth):
+        """
+            Params:
+                depth:  depth of the function to print out
+        """
         self.printDependencies(depth)
-        print_tabs(depth)
-        print("alias:",self.alias)
-        self.printFunctions(depth)
+        self.printObjects(depth)
         print('')
