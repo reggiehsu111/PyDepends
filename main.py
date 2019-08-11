@@ -1,6 +1,6 @@
 import argparse
 from FGC.fileGraphConstructor import FileGraphConstructor
-from moduleGraphConstructor import ModuleGraphConstructor
+from MGC import ModuleGraphConstructor
 from FGC.moduleNode import ModuleNode
 
 
@@ -59,5 +59,10 @@ def main():
         Write external dependencies found by findDepends() into requirements.txt for pip to install
     """
     MGC.writeRequirements()
+    """
+        Get subgraph by specifying a list of file full names
+        Full Name of the file must be of relative path to module_root
+    """
+    MGC.SubGraph(['./visualizer/visualizer.py','./MGC/__init__.py'])
 if __name__ == '__main__':
     main()
