@@ -1,0 +1,4 @@
+find_dep/
+__pycache__/
+.git/
+*.pyc
