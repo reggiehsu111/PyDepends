@@ -52,8 +52,8 @@ class graphVisualizer(pgv.AGraph):
     """ Use when using pgv as dependency """
     def showGraphPGV(self):
         self.layout(prog='dot')
-        self.draw(self.graph_file_path)
-        self.write(self.graph_file_path.split('.')[0]+'.dot')
+        self.draw(self.graph_file_path+'.png')
+        self.write(self.graph_file_path]+'.dot')
 
     """ Use when using nx as dependency """
     def showGraphNX(self):
