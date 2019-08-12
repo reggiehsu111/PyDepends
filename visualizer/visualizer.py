@@ -1,6 +1,12 @@
 import pygraphviz as pgv
 import networkx as nx
 import matplotlib.pyplot as plt
+"""
+    Use either pygraphviz or networkx to visualize the file structure graph
+    If using pgv:   Set inheritance parent to pgv.AGraph
+    If using nx:    Set inheritance parent to nx.DiGraph
+    Warning:        The nx graph visualization is a mess!
+"""
 class graphVisualizer(pgv.AGraph):
     def __init__(self, graph_file_path):
         super().__init__(strict=False,directed=True)
