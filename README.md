@@ -1,5 +1,5 @@
 # PyDepends
-Python3 project to plot file dependency graphs and write ```requirements.txt``` automatically
+Python3 project to plot file dependency graphs and detect external module dependencies to write into ```requirements.txt``` automatically
 
 ## Dependencies
 - The dependencies are only for graph visualization
