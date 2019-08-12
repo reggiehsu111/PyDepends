@@ -65,6 +65,6 @@ def main():
         Get subgraph by specifying a list of file path relative to the module_root
         Full Name of the file must be of relative path to module_root
     """
-    MGC.SubGraph(['test_module/test2.py','test_module/tester.py'])
+    # MGC.SubGraph(['test_module/test2.py','test_module/tester.py'])
 if __name__ == '__main__':
     main()
