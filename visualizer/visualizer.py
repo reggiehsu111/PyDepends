@@ -32,24 +32,24 @@ class graphVisualizer(pgv.AGraph):
 
     def addFile(self,FileNode):
         assert FileNode.customType() == 'File'
-        self.add_node(FileNode.FileName, color='blue')
+        self.add_node(FileNode.FullName, label=FileNode.FileName, color='blue')
 
     def addDir(self,DirNode):
         assert DirNode.customType() == 'Directory'
-        self.add_node(DirNode.DirName, color='black')
+        self.add_node(DirNode.FullName, label=DirNode.DirName, color='black')
         for childDir in DirNode.childDir:
-            self.add_edge(DirNode.DirName,childDir.DirName)
+            self.add_edge(DirNode.FullName,childDir.FullName)
         for childFile in DirNode.childFile:
-            self.add_edge(DirNode.DirName,childFile.FileName)
+            self.add_edge(DirNode.FullName,childFile.FullName)
 
     def addDependencies(self, currentfile, tracenode):
         assert currentfile.customType() == 'File'
         assert tracenode.customType() == 'File'
-        self.add_edge(currentfile.FileName, tracenode.FileName, color='red')
+        self.add_edge(currentfile.FullName, tracenode.FullName, color='red')
 
     def addExternals(self, currentfile, extern):
         assert currentfile.customType() == 'File'
-        self.add_edge(currentfile.FileName, extern, color='green')
+        self.add_edge(currentfile.FullName, extern, color='green')
 
     def showGraph(self):
         for base in self.__class__.__bases__:
