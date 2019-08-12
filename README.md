@@ -2,10 +2,20 @@
 Python3 project to plot file dependency graphs and write ```requirements.txt``` automatically
 
 ## Dependencies
+- The dependencies are only for graph visualization
 - Install dependencies using:
 ```
   pip install -r requirements.txt
 ```
+- Use either ```pygraphviz``` or ```networkx``` to visualize graph
+## Graph Visualization
+- For the entire file:
+
+![](./file_structure.png)
+
+- For SubGraph:
+
+![](./Subgraph.png)
 
 ## Usage
 - ```python3 main.py -h``` to see argument usage 
@@ -20,7 +30,32 @@ Python3 project to plot file dependency graphs and write ```requirements.txt``` 
 - Output dot file as ```{args.graphpath}.dot```
 
 ## File Structure
-- This is print out by the programme itself
+- This is print out by the program itself
+
+.....File Structure.....
+```
+/.
+	/test_module
+		tester.py
+		__init__.py
+		test2.py
+	/MGC
+		moduleClasses.py
+		__init__.py
+		SubGraph.py
+	/utils
+		util.py
+		__init__.py
+	/FGC
+		moduleNode.py
+		__init__.py
+		fileGraphConstructor.py
+	/visualizer
+		__init__.py
+		visualizer.py
+	pgv2nx.py
+	main.py
+```
 
 File: ./pgv2nx.py
 Constructing definitions in file: ./pgv2nx.py
@@ -304,30 +339,7 @@ imp
 pygraphviz
 re
 
-.....File Structure.....
-```
-/.
-	/test_module
-		tester.py
-		__init__.py
-		test2.py
-	/MGC
-		moduleClasses.py
-		__init__.py
-		SubGraph.py
-	/utils
-		util.py
-		__init__.py
-	/FGC
-		moduleNode.py
-		__init__.py
-		fileGraphConstructor.py
-	/visualizer
-		__init__.py
-		visualizer.py
-	pgv2nx.py
-	main.py
-```
+
 .....External dependencies that are installed.....
 ```
 	 networkx
