@@ -24,6 +24,7 @@ Python3 project to plot file dependency graphs and write ```requirements.txt``` 
 
 File: ./pgv2nx.py
 Constructing definitions in file: ./pgv2nx.py
+
 	All modules:
 		networkx
 		matplotlib.pyplot
@@ -37,6 +38,7 @@ Constructing definitions in file: ./pgv2nx.py
 
 File: ./main.py
 Constructing definitions in file: ./main.py
+
 	All modules:
 		argparse
 		FGC.fileGraphConstructor
@@ -54,6 +56,7 @@ Constructing definitions in file: ./main.py
 
 File: ./test_module/tester.py
 Constructing definitions in file: ./test_module/tester.py
+
 	All modules:
 		test_module.test2
 
@@ -66,6 +69,7 @@ Constructing definitions in file: ./test_module/tester.py
 
 File: ./test_module/__init__.py
 Constructing definitions in file: ./test_module/__init__.py
+
 	All modules:
 		test_module
 		.
@@ -79,6 +83,7 @@ Constructing definitions in file: ./test_module/__init__.py
 
 File: ./test_module/test2.py
 Constructing definitions in file: ./test_module/test2.py
+
 	All modules:
 		test_module.tester
 
@@ -91,6 +96,7 @@ Constructing definitions in file: ./test_module/test2.py
 
 File: ./MGC/moduleClasses.py
 Constructing definitions in file: ./MGC/moduleClasses.py
+
 	All modules:
 
 	No external dependencies
@@ -114,6 +120,7 @@ Constructing definitions in file: ./MGC/moduleClasses.py
 
 File: ./MGC/__init__.py
 Constructing definitions in file: ./MGC/__init__.py
+
 	All modules:
 		os
 		moduleClasses
@@ -158,6 +165,7 @@ Constructing definitions in file: ./MGC/__init__.py
 
 File: ./MGC/SubGraph.py
 Constructing definitions in file: ./MGC/SubGraph.py
+
 	All modules:
 		visualizer.visualizer
 
@@ -171,6 +179,7 @@ Constructing definitions in file: ./MGC/SubGraph.py
 
 File: ./utils/util.py
 Constructing definitions in file: ./utils/util.py
+
 	All modules:
 
 	No external dependencies
@@ -181,6 +190,7 @@ Constructing definitions in file: ./utils/util.py
 
 File: ./utils/__init__.py
 Constructing definitions in file: ./utils/__init__.py
+
 	All modules:
 
 	No external dependencies
@@ -190,6 +200,7 @@ Constructing definitions in file: ./utils/__init__.py
 
 File: ./FGC/moduleNode.py
 Constructing definitions in file: ./FGC/moduleNode.py
+
 	All modules:
 		utils.util
 
@@ -213,6 +224,7 @@ Constructing definitions in file: ./FGC/moduleNode.py
 
 File: ./FGC/__init__.py
 Constructing definitions in file: ./FGC/__init__.py
+
 	All modules:
 
 	No external dependencies
@@ -222,6 +234,7 @@ Constructing definitions in file: ./FGC/__init__.py
 
 File: ./FGC/fileGraphConstructor.py
 Constructing definitions in file: ./FGC/fileGraphConstructor.py
+
 	All modules:
 		ast
 		FGC.moduleNode
@@ -244,6 +257,7 @@ Constructing definitions in file: ./FGC/fileGraphConstructor.py
 
 File: ./visualizer/__init__.py
 Constructing definitions in file: ./visualizer/__init__.py
+
 	All modules:
 
 	No external dependencies
@@ -253,6 +267,7 @@ Constructing definitions in file: ./visualizer/__init__.py
 
 File: ./visualizer/visualizer.py
 Constructing definitions in file: ./visualizer/visualizer.py
+
 	All modules:
 		pygraphviz
 		networkx
@@ -276,7 +291,9 @@ Constructing definitions in file: ./visualizer/visualizer.py
 		graphVisualizer/showGraph
 		graphVisualizer/showGraphPGV
 		graphVisualizer/showGraphNX
+		
 ......All external dependencies......
+
 sys
 ast
 argparse
@@ -286,7 +303,9 @@ networkx
 imp
 pygraphviz
 re
+
 .....File Structure.....
+```
 /.
 	/test_module
 		tester.py
@@ -308,20 +327,22 @@ re
 		visualizer.py
 	pgv2nx.py
 	main.py
-Are builtin packages
+```
 .....External dependencies that are installed.....
+```
 	 networkx
 	 pygraphviz
 	 matplotlib
-
+```
 .....External dependencies that are not installed.....
 
 .....Built in dependencies.....
+```
 	 sys
 	 ast
 	 argparse
 	 os
 	 imp
 	 re
-
+```
 
