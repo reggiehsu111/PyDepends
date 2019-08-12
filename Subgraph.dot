@@ -1,16 +1,18 @@
 digraph "" {
 	graph [bb="0,0,79.657,108"];
 	node [label="\N"];
-	"test2.py"	 [color=blue,
+	"./test_module/test2.py"	 [color=blue,
 		height=0.5,
+		label="test2.py",
 		pos="39.828,90",
 		width=1.0518];
-	"tester.py"	 [color=blue,
+	"./test_module/tester.py"	 [color=blue,
 		height=0.5,
+		label="tester.py",
 		pos="39.828,18",
 		width=1.1063];
-	"test2.py" -> "tester.py"	 [color=red,
+	"./test_module/test2.py" -> "./test_module/tester.py"	 [color=red,
 		pos="e,33.908,35.843 33.913,72.202 33.123,64.327 32.894,54.875 33.225,46.085"];
-	"tester.py" -> "test2.py"	 [color=red,
+	"./test_module/tester.py" -> "./test_module/test2.py"	 [color=red,
 		pos="e,45.744,72.202 45.749,35.843 46.536,43.724 46.763,53.177 46.429,61.965"];
 }

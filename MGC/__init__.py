@@ -34,7 +34,10 @@ class ModuleGraphConstructor():
         # For plotting file structure graph
         self.visualgraph = visualgraph
         if self.visualgraph:
+            # self.graphVis for file level dependencies
             self.graphVis = graphVisualizer(graph_file_path)
+            # self.funcGraphVis for function/class level dependencies
+            self.funcGraphVis = None
         self.ignore_files = []
         self.ignore_dirs = []
         self.ignoreConfig = ignoreConfig

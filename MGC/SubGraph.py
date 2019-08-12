@@ -12,12 +12,13 @@ def dep_resolve(file, included, subGraphVis):
 """
 	MGC method to find Subgraph dependencies specifying fileNames
 """
-def SubGraph(self, fileNames):
+def SubGraph(self, fileNames, subGraphPath):
 	"""
 		Params:
-			fileNames:	List of file names to be considered (file names are paths relative to self.module_root)
+			fileNames:		List of file names to be considered (file names are paths relative to self.module_root)
+			subGraphPath:	Path to save the subgraph
 	"""
-	subGraphVis = graphVisualizer('Subgraph')
+	subGraphVis = graphVisualizer(subGraphPath)
 	included = set()
 	assert type(fileNames) == list
 	print("Constructing Subgraph with files:")

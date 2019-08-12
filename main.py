@@ -67,12 +67,17 @@ def main():
     """
         Get subgraph by specifying a list of file path relative to the module_root
         Full Name of the file must be of relative path to module_root
+        Params:
+            fileNames:      List to pass in file paths relative to the module_root
+            subGraphPath:   Path to save the sub graph as {subGraphPath}.dot and {subGraphPath}.png
     """
-    # MGC.SubGraph(['test_module/test2.py','test_module/tester.py'])
+    MGC.SubGraph(['test_module/test2.py','test_module/tester.py'], subGraphPath='SubGraph')
 
     """
-        Construct class/function level dependency grpah
+        Construct class/function level dependency graph
+        Params:
+            funcGraphPath:  Path to save the function dependency graph as {funcGraphPath}.dot and {funcGraphPath}.png
     """
-    MGC.FuncDepend()
+    MGC.FuncDepend(funcGraphPath='func_depend')
 if __name__ == '__main__':
     main()
