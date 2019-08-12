@@ -14,6 +14,10 @@ Python3 project to plot file dependency graphs and write ```requirements.txt``` 
 - ```python3 main.py -ic={ignoreConfig}``` to specify which config file to read ignore files from
 - ```python3 main.py -vb``` to print verbosely when finding dependencies
 - ```python3 main.py -gp``` to specify graph path
+- ```python3 main.py -vg``` to specify whether to show graph
+
+## Constraints
+- ```MGC.printModule(show_graph=True)``` and ```SubGraph``` utility is available only when either ```pygraphviz``` or ```networkx``` is installed 
 
 ## Outputs
 - Output png file as ```{args.graphpath}.png```

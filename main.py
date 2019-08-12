@@ -12,6 +12,7 @@ def main():
     parser.add_argument('-af','--allFiles', action='store_false', help='Specify if only python files are considered')
     parser.add_argument('-ic','--ignoreConfig', type=str, default='.gitignore', help='Config file path relative to module root to specify which files to ignore.\n Provide "None" or "none" if no ignoreConfig is specfied.')
     parser.add_argument('-vb','--verbose', action='store_true', help='determine if verbosely find dependencies')
+    parser.add_argument('-vg', '--visualgraph', action='store_true', help='Specify whether to visualize graph')
     parser.add_argument('-gp', '--graphpath', type=str, default='file_structure', help='path to save the file structure graph')
     args = parser.parse_args()
 
@@ -31,7 +32,7 @@ def main():
     """
     if args.ignoreConfig.lower() == "none":
         args.ignoreConfig = ''
-    MGC = ModuleGraphConstructor(args.moduleRoot, args.ignoreConfig, args.graphpath)
+    MGC = ModuleGraphConstructor(args.moduleRoot, args.ignoreConfig, args.graphpath, args.visualgraph)
 
     """
         Traverse the module under args.moduleRoot
@@ -55,7 +56,9 @@ def main():
             show_graph: Determines whether to plot file structure graph,
                         the graph is saved as {args.moduleRoot}_file-structure.png
     """
-    MGC.printModule(show_graph=True)
+    # args.visualgraph must be true to show graph
+    show_graph = True and args.visualgraph
+    MGC.printModule(show_graph=show_graph)
 
     """
         Write external dependencies found by findDepends() into requirements.txt for pip to install

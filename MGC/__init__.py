@@ -14,12 +14,13 @@ import imp
 """
 class ModuleGraphConstructor():
     from .SubGraph import SubGraph
-    def __init__(self, module_root, ignoreConfig, graph_file_path):
+    def __init__(self, module_root, ignoreConfig, graph_file_path, visualgraph):
         """
             Params: 
                 module_root:    path to the root of the module
                 ignoreConfig:   path to the ignoreConfig file
                 graph_file_path:path to save the graph
+                visualgraph:    whether to visaulize the graph
         """
         self.module_root = module_root
         self.FGC = FileGraphConstructor()
@@ -30,7 +31,9 @@ class ModuleGraphConstructor():
         # Dict type to store resolved ClassDefs defined in __init__.py
         self.resolvedClassDefs = {}
         # For plotting file structure graph
-        self.graphVis = graphVisualizer(graph_file_path)
+        self.visualgraph = visualgraph
+        if self.visualgraph:
+            self.graphVis = graphVisualizer(graph_file_path)
         self.ignore_files = []
         self.ignore_dirs = []
         self.ignoreConfig = ignoreConfig
@@ -181,7 +184,7 @@ class ModuleGraphConstructor():
         currentnode = self.directories[self.module_root]
         print(".....File Structure.....")
         self.traversePrint(currentnode, -1)
-        if show_graph:
+        if show_graph and self.visualgraph:
             self.graphVis.showGraph()
 
     def traversePrint(self, currentnode, depth):
@@ -191,14 +194,16 @@ class ModuleGraphConstructor():
             print_tabs(depth)
             print(currentnode)
             # Add file to graph
-            self.graphVis.addFile(currentnode)
+            if self.visualgraph:
+                self.graphVis.addFile(currentnode)
         elif currentnode.customType() == 'Directory':
             # Print dir node with indentation
             print_tabs(depth)
             print('/',end='')
             print(currentnode)
             # Add dir to graph
-            self.graphVis.addDir(currentnode)
+            if self.visualgraph:
+                self.graphVis.addDir(currentnode)
             if len(currentnode.childDir) > 0:
                 for dirNode in currentnode.childDir:
                     self.traversePrint(dirNode, depth)
@@ -238,7 +243,8 @@ class ModuleGraphConstructor():
                             try:
                                 tracenode = self.files[temp_file]
                                 currentfile.dependFiles.add(tracenode)
-                                self.graphVis.addDependencies(currentfile,tracenode)
+                                if self.visualgraph:
+                                    self.graphVis.addDependencies(currentfile,tracenode)
                             # Else obj is a class defined in __init__.py or there is an error
                             except KeyError as e:
                                 key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
@@ -271,7 +277,8 @@ class ModuleGraphConstructor():
                             try:
                                 tracenode = self.files[temp_file]
                                 currentfile.dependFiles.add(tracenode)
-                                self.graphVis.addDependencies(currentfile,tracenode)
+                                if self.visualgraph:
+                                    self.graphVis.addDependencies(currentfile,tracenode)
                             # Else obj is a class defined in __init__.py or there is an error
                             except KeyError as e:
                                 key = currentfile.FullName+'|'+tracenode.FullName+'/'+obj.alias
@@ -283,14 +290,16 @@ class ModuleGraphConstructor():
                     # if delegate is a file
                     if delegate in self.files:
                         tracenode = self.files[delegate]
-                        self.graphVis.addDependencies(currentfile,tracenode)
+                        if self.visualgraph:
+                            self.graphVis.addDependencies(currentfile,tracenode)
                         currentfile.dependFiles.add(tracenode)
                     # else delegate is an external dependency
                     else:
                         # Add external dependency
                         currentfile.externals.add(delegates[0])
-                        self.graphVis.add_node(delegates[0], color='green')
-                        self.graphVis.addExternals(currentfile, delegates[0])
+                        if self.visualgraph:
+                            self.graphVis.add_node(delegates[0], color='green')
+                            self.graphVis.addExternals(currentfile, delegates[0])
                         self.allExterns.add(delegates[0])
                         continue
         if verbose:
@@ -333,14 +342,16 @@ class ModuleGraphConstructor():
             if obj == "*":
                 for file in self.directories[temp_root_dir].childFile:
                     cf.dependFiles.add(file)
-                    self.graphVis.addDependencies(cf, file)
+                    if self.visualgraph:
+                        self.graphVis.addDependencies(cf, file)
                 for file in self.directories[temp_root_dir].childFile:
                     # try:
                     if "__init__.py" == file.FileName:
                         if obj in file.classes:
                             self.resolvedClassDefs[currentfile+'|'+pcd] = obj
                             cf.dependFiles.add(file)
-                            self.graphVis.addDependencies(cf,file)
+                            if self.visualgraph:
+                                self.graphVis.addDependencies(cf,file)
                     # except KeyError as e:
                     #     print("temp_root_dir:", temp_root_dir)
                     #     raise(e)
