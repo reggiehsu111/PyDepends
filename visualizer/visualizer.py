@@ -1,6 +1,7 @@
 import pygraphviz as pgv
 import networkx as nx
 import matplotlib.pyplot as plt
+import ast
 """
     Use either pygraphviz or networkx to visualize the file structure graph
     If using pgv:   Set inheritance parent to pgv.AGraph \
@@ -41,6 +42,19 @@ class graphVisualizer(pgv.AGraph):
             self.add_edge(DirNode.FullName,childDir.FullName)
         for childFile in DirNode.childFile:
             self.add_edge(DirNode.FullName,childFile.FullName)
+
+    def addClass(self, file, classNode):
+        self.add_node(file.FullName+'-'+classNode.name, label=classNode.name, color='purple')
+        self.add_edge(file.FullName, file.FullName+'-'+classNode.name, color='purple')
+        for func in classNode.body:
+            if isinstance(func, ast.FunctionDef):
+                self.add_node(file.FullName+'-'+classNode.name+'-'+func.name,label=func.name, color='orange')
+                self.add_edge(file.FullName+'-'+classNode.name, file.FullName+'-'+classNode.name+'-'+func.name, color='orange')
+                # self.add_edge(file.FullName+'-'+classNode.name)
+
+    def addFunc(self, file, funcNode):
+        self.add_node(file.FullName+'-'+funcNode.name, label=funcNode.name, color='orange')
+        self.add_edge(file.FullName, file.FullName+'-'+funcNode.name, color='orange')
 
     def addDependencies(self, currentfile, tracenode):
         assert currentfile.customType() == 'File'

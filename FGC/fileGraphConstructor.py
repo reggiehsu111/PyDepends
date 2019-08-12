@@ -60,7 +60,7 @@ class FileGraphConstructor(ast.NodeVisitor):
     def visit_ClassDef(self, node):
         self.classes[node.name] = node
         for func in node.body:
-            if isinstance(func,ast.FunctionDef):
+            if isinstance(func, ast.FunctionDef):
                 self.functions[node.name+'/'+func.name] = func
         self.generic_visit(node)
 

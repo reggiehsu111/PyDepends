@@ -69,5 +69,10 @@ def main():
         Full Name of the file must be of relative path to module_root
     """
     # MGC.SubGraph(['test_module/test2.py','test_module/tester.py'])
+
+    """
+        Construct class/function level dependency grpah
+    """
+    MGC.FuncDepend()
 if __name__ == '__main__':
     main()

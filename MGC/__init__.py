@@ -14,6 +14,7 @@ import imp
 """
 class ModuleGraphConstructor():
     from .SubGraph import SubGraph
+    from .FuncDepend import FuncDepend
     def __init__(self, module_root, ignoreConfig, graph_file_path, visualgraph):
         """
             Params: 
