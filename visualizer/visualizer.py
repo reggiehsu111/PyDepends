@@ -3,8 +3,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 """
     Use either pygraphviz or networkx to visualize the file structure graph
-    If using pgv:   Set inheritance parent to pgv.AGraph
-    If using nx:    Set inheritance parent to nx.DiGraph
+    If using pgv:   Set inheritance parent to pgv.AGraph \
+                        and comment out "import networkx as nx" and "import matplotlib.pyplot as plt"
+    If using nx:    Set inheritance parent to nx.DiGraph \
+                        and comment out "import pygraphviz as pgv"
     Warning:        The nx graph visualization is a mess!
 """
 class graphVisualizer(pgv.AGraph):
