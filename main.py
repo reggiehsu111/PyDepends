@@ -10,7 +10,7 @@ def main():
     # For fgc usage
     parser.add_argument('-f','--filename', type=str, default='main.py', help='Specify which file to find dependencies on')
     parser.add_argument('-af','--allFiles', action='store_false', help='Specify if only python files are considered')
-    parser.add_argument('-ic','--ignoreConfig', type=str, default='.gitignore', help='Config file to specify which files to ignore')
+    parser.add_argument('-ic','--ignoreConfig', type=str, default='.gitignore', help='Config file path relative to module root to specify which files to ignore.\n Provide "None" or "none" if no ignoreConfig is specfied.')
     parser.add_argument('-vb','--verbose', action='store_true', help='determine if verbosely find dependencies')
     parser.add_argument('-gp', '--graphpath', type=str, default='file_structure', help='path to save the file structure graph')
     args = parser.parse_args()
@@ -29,6 +29,8 @@ def main():
             ignoreConfig:   Config file to specify which files to ignore, default to .gitignore
             graphpath:      Path to save the file structure graph
     """
+    if args.ignoreConfig.lower() == "none":
+        args.ignoreConfig = ''
     MGC = ModuleGraphConstructor(args.moduleRoot, args.ignoreConfig, args.graphpath)
 
     """
@@ -60,9 +62,9 @@ def main():
     """
     MGC.writeRequirements()
     """
-        Get subgraph by specifying a list of file full names
+        Get subgraph by specifying a list of file path relative to the module_root
         Full Name of the file must be of relative path to module_root
     """
-    MGC.SubGraph(['./visualizer/visualizer.py','./MGC/__init__.py'])
+    MGC.SubGraph(['test_module/test2.py','test_module/tester.py'])
 if __name__ == '__main__':
     main()

@@ -36,13 +36,15 @@ class ModuleGraphConstructor():
         self.ignoreConfig = ignoreConfig
         # Set to store all external dependencies of a module
         self.allExterns = set()
-        with open(self.module_root+'/'+self.ignoreConfig,'r') as f:
-            ignore_files = f.read().splitlines() 
-        for file in ignore_files:
-            if file.endswith('/'):
-                self.ignore_dirs.append(file[:-1])
-            else:
-                self.ignore_files.append(file)
+        # Determine if ignoreConfig is specified
+        if ignoreConfig is not '':
+            with open(self.module_root+'/'+self.ignoreConfig,'r') as f:
+                ignore_files = f.read().splitlines()
+            for file in ignore_files:
+                if file.endswith('/'):
+                    self.ignore_dirs.append(file[:-1])
+                else:
+                    self.ignore_files.append(file)
 
     def constructFileNode(self, root, fileName, onlyPython=False):
         """
@@ -332,12 +334,17 @@ class ModuleGraphConstructor():
                 for file in self.directories[temp_root_dir].childFile:
                     cf.dependFiles.add(file)
                     self.graphVis.addDependencies(cf, file)
-            for file in self.directories[temp_root_dir].childFile:
-                if "__init__.py" == file.FileName:
-                    if obj in file.classes:
-                        self.resolvedClassDefs[currentfile+'|'+pcd] = obj
-                        cf.dependFiles.add(file)
-                        self.graphVis.addDependencies(cf,file)
+                for file in self.directories[temp_root_dir].childFile:
+                    # try:
+                    if "__init__.py" == file.FileName:
+                        if obj in file.classes:
+                            self.resolvedClassDefs[currentfile+'|'+pcd] = obj
+                            cf.dependFiles.add(file)
+                            self.graphVis.addDependencies(cf,file)
+                    # except KeyError as e:
+                    #     print("temp_root_dir:", temp_root_dir)
+                    #     raise(e)
+                    #     exit()
     """
         Traverse files in self.files and find their dependencies
     """

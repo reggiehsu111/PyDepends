@@ -19,7 +19,12 @@ class FileGraphConstructor(ast.NodeVisitor):
     def readFile(self, moduleName):
         self.moduleName = moduleName
         with open(self.moduleName, "r") as source:
-            self.tree = ast.parse(source.read())
+            try:
+                self.tree = ast.parse(source.read())
+            except SyntaxError as e:
+                print("\nIn parsing file:", self.moduleName, "a SyntaxError has occured.\n")
+                print(e)
+                pass
         del self.moduleNodes
         del self.classes
         del self.functions
