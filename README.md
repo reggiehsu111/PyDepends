@@ -9,7 +9,7 @@ Python3 project to plot file dependency graphs and detect external module depend
 ```
 - Use either ```pygraphviz``` or ```networkx``` to visualize graph, see ```visualizer/visualizer.py``` for detailed instructions
 ## Graph Visualization
-- For the entire file:
+- For the entire project directory:
 
 ![](./file_structure.png)
 
